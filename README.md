@@ -13,6 +13,7 @@ VotingAPI is a simple, lightweight RESTful API built with ASP.NET Core for manag
 -  JWT authentication and role-based authorization 
 -  Uses the Repository pattern and Unit of Work
 -  Use AutoMapper for Map Data
+-  External Login with Google
 
 ---
 
