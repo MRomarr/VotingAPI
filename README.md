@@ -18,9 +18,9 @@ VotingAPI is a simple, lightweight RESTful API built with ASP.NET Core for manag
 
 ## 🧰 Tech Stack
 
-ASP.NET Core Web API (.NET 9)
-Entity Framework Core
-SQL Server
+- ASP.NET Core Web API (.NET 9)
+- Entity Framework Core
+- SQL Server
 JWT Authentication
 role-based authorization
 Swagger (for API testing)
