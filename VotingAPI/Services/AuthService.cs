@@ -6,6 +6,9 @@ using Microsoft.IdentityModel.Tokens;
 using VotingAPI.DTOs.AuthDTOs;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using static Google.Apis.Auth.GoogleJsonWebSignature;
+using Google.Apis.Auth;
 
 namespace VotingAPI.Services
 {
@@ -14,15 +17,18 @@ namespace VotingAPI.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly JWTHelper _jwt;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        public AuthService(UserManager<ApplicationUser> userManger, 
-            IOptions<JWTHelper> jwt, RoleManager<IdentityRole> roleManager,
-            SignInManager<ApplicationUser> signInManager)
+        private readonly IConfiguration _config;
+        public AuthService(
+            UserManager<ApplicationUser> userManger,
+            IOptions<JWTHelper> jwt,
+            RoleManager<IdentityRole> roleManager
+,
+            IConfiguration config)
         {
             _userManager = userManger;
             _roleManager = roleManager;
             _jwt = jwt.Value;
-            _signInManager = signInManager;
+            _config = config;
         }
 
         public async Task<AuthDto> RegisterAsync(RegisterDto dto)
@@ -141,6 +147,62 @@ namespace VotingAPI.Services
             );
             return jwtToken;
         }
+
+        public async Task<ServiceResult<AuthDto>> GoogleSignIn(GoogleSignInDto model)
+        {
+            Payload payload;
+
+            try
+            {
+                payload = await ValidateAsync(model.IdToken, new ValidationSettings
+                {
+                    Audience = new[] { _config["GoogleAuth:ClientId"] }
+                });
+
+            }
+            catch (Exception)
+            {
+                return new ServiceResult<AuthDto>()
+                {
+                    Message = "Invalid Google token."
+                };
+            }
+            var user = await _userManager.FindByEmailAsync(payload.Email);
+            if (user is null)
+            {
+                user = new ApplicationUser
+                {
+                    UserName = payload.Email,
+                    Email = payload.Email,
+                    EmailConfirmed = true
+                };
+                var result = await _userManager.CreateAsync(user);
+                if (!result.Succeeded)
+                {
+                    var errors = result.Errors.Select(e => e.Description).ToList();
+                    return new ServiceResult<AuthDto>()
+                    {
+                        Message = errors.ToString()
+                    };
+                }
+            }
+            var token = await CreateJwtToken(user);
+            var roles = await _userManager.GetRolesAsync(user);
+            return new ServiceResult<AuthDto>()
+            {
+                Success = true,
+                Data = new AuthDto
+                {
+                    Message = "Google Sign In successful.",
+                    Token = new JwtSecurityTokenHandler().WriteToken(token),
+                    TokenExpiration = token.ValidTo,
+                    Role = roles.ToList(),
+                    IsAuthenticated = true
+                }
+            };
+
+        }
+
     }
 
 }

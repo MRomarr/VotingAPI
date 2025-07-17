@@ -74,6 +74,7 @@ namespace VotingAPI
         private static IServiceCollection AddJWT(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<JWTHelper>(configuration.GetSection(JWTHelper.Section));
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

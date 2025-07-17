@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using VotingAPI.DTOs.AuthDTOs;
+using System.Reflection.Metadata;
 
 namespace VotingAPI.Controllers
 {
@@ -68,7 +69,16 @@ namespace VotingAPI.Controllers
             return Ok(result);
         }
 
+        [HttpPost("signin-google")]
+        public async Task<IActionResult> GoogleSignIn(GoogleSignInDto dto)
+        {
+            var result = await _authService.GoogleSignIn(dto);
+            if (!result.Success)
+                return BadRequest(result);
+            
+            return Ok(result);
+            
+        }
 
-        
     }
 }

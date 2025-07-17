@@ -9,6 +9,6 @@ namespace VotingAPI.Interface
         Task<AuthDto> RegisterAsync(RegisterDto dto);
         Task<AuthDto> LoginAsync(LoginDto dto);
         Task<string> AddRoleAsync(AddRoleDto dto);
-        
+        Task<ServiceResult<AuthDto>> GoogleSignIn(GoogleSignInDto dto);
     }
 }
