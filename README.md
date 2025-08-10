@@ -26,7 +26,6 @@ VotingAPI is a simple, lightweight RESTful API built with ASP.NET Core for manag
 - role-based authorization
 - Swagger (for API testing)
 
-
 ---
 
 ERD
